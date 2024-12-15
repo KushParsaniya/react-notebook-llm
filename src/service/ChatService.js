@@ -12,7 +12,7 @@ const ChatService = {
                 'Authorization': localStorage.getItem('jwtToken')
             }
         });
-        return {status: response.status, data: response.data};
+        return {status: response.status, data: response.data, chatId: response.headers.get("x-chat-id")};
     },
 
     getChatHistory: async (chatId) => {

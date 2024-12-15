@@ -11,16 +11,17 @@ export default function ChatPage() {
     const [messages, setMessages] = useState([])
     const [input, setInput] = useState('')
     const { id } = useParams() // Extract the chat ID from the route
+    const [chatId, setChatId] = useState(id) // Stated to store the chat ID
     const navigate = useNavigate()
     const cardContentRef = useRef(null) // Ref to track the scrollable container
     const [isScrolledUp, setIsScrolledUp] = useState(false) // State for "Scroll to Bottom" button visibility
 
-    // Fetch chat messages dynamically based on `id`
+    // Fetch chat messages dynamically based on `chatId`
     useEffect(() => {
         const fetchChatMessages = async () => {
-            if (id) {
+            if (chatId) {
                 try {
-                    const { status, data } = await chatService.getChatHistory(id) // Call API
+                    const { status, data } = await chatService.getChatHistory(chatId) // Call API
                     if (status === 200) {
                         const formattedMessages = data.map(msg => ({
                             role: msg.messageType === 'USER' ? 'user' : 'assistant',
@@ -38,7 +39,7 @@ export default function ChatPage() {
             }
         }
         fetchChatMessages()
-    }, [id])
+    }, [chatId])
 
     // Scroll to the bottom of the chat container
     const scrollToBottom = () => {
@@ -66,14 +67,21 @@ export default function ChatPage() {
 
         try {
             // Send message to backend and get response
-            const response = await chatService.sendMessage(id, input) // Call send message API
-            const aiResponse = {
-                role: 'assistant',
-                content: response.data, // Response from AI
-                createdAt: new Date().toISOString(),
+            const {status, data, chatIdNew} = await chatService.sendMessage(chatId, input) // Call send message API
+            if (status === 200) {
+                const aiResponse = {
+                    role: 'assistant',
+                    content: data, // Response from AI
+                    createdAt: new Date().toISOString(),
+                }
+                if (chatIdNew) {
+                    setChatId(chatIdNew)
+                }
+                setMessages(prevMessages => [...prevMessages, aiResponse])
+                scrollToBottom() // Scroll to bottom after receiving AI response
+            } else {
+                console.log("error sending message.")
             }
-            setMessages(prevMessages => [...prevMessages, aiResponse])
-            scrollToBottom() // Scroll to bottom after receiving AI response
         } catch (error) {
             console.error('Error sending message:', error)
         }
@@ -86,7 +94,7 @@ export default function ChatPage() {
     return (
         <Layout>
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">Chat {id ? `#${id}` : ''}</h1>
+                <h1 className="text-3xl font-bold">Chat {chatId ? `#${chatId}` : ''}</h1>
                 <Button onClick={handleBack}>Back to Dashboard</Button>
             </div>
             <Card className="h-[calc(100vh-12rem)] flex flex-col relative">
