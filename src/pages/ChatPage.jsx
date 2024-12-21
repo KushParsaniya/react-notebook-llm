@@ -67,15 +67,17 @@ export default function ChatPage() {
 
         try {
             // Send message to backend and get response
-            const {status, data, chatIdNew} = await chatService.sendMessage(chatId, input) // Call send message API
+            const {status, data} = await chatService.sendMessage(chatId, input) // Call send message API
             if (status === 200) {
                 const aiResponse = {
                     role: 'assistant',
-                    content: data, // Response from AI
+                    content: data.content, // Response from AI
                     createdAt: new Date().toISOString(),
                 }
-                if (chatIdNew) {
-                    setChatId(chatIdNew)
+                console.log("chatIdNew: " + data.chatId)
+                if (data.chatId) {
+                    setChatId(data.chatId)
+                    navigate(`/chat/${data.chatId}`)
                 }
                 setMessages(prevMessages => [...prevMessages, aiResponse])
                 scrollToBottom() // Scroll to bottom after receiving AI response

@@ -1,6 +1,7 @@
 import axios from 'axios';
+import config from "@/config/config.js";
 
-const API_BASE_URL = 'http://localhost:8080/api/v1/chat';
+const API_BASE_URL = config.baseUrl + '/api/v1/chat';
 
 const ChatService = {
     sendMessage: async (chatId, message) => {
@@ -12,7 +13,7 @@ const ChatService = {
                 'Authorization': localStorage.getItem('jwtToken')
             }
         });
-        return {status: response.status, data: response.data, chatId: response.headers.get("x-chat-id")};
+        return {status: response.status, data: response.data};
     },
 
     getChatHistory: async (chatId) => {

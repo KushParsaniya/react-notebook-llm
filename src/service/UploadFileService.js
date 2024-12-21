@@ -1,6 +1,7 @@
 import axios from 'axios';
+import config from "@/config/config.js";
 
-const API_URL = 'http://localhost:8080/api/v1/file';
+const API_URL = config.baseUrl + '/api/v1/file';
 
 class UploadFileService {
 
